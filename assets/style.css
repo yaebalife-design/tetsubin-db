@@ -1553,3 +1553,92 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
   border-radius: 999px;
   color: var(--sub);
 }
+
+/* ============================================================
+   南部鉄瓶-DB テーマ上書き（鉄器の 黒 × 銅 × 金）
+   GIN-DBの 緑×金 から転換。:root変数＋ハードコードされた緑を上書き。
+   ============================================================ */
+:root {
+  --bg: #f5f1ea;
+  --paper: #ffffff;
+  --ink: #1a1714;
+  --sub: #6f6760;
+  --sub-2: #948b82;
+  --line: #e7e0d3;
+  --line-light: #f2ece1;
+
+  /* メインアクセント＝銅（旧 --green 系を置換） */
+  --green: #a06a35;
+  --green-dark: #7a4f25;
+  --green-deeper: #2a1d12;
+
+  /* プレミアム＝金 */
+  --gold: #c9a23f;
+  --gold-light: #e0c074;
+  --gold-deep: #9c7a2c;
+
+  --rose: #b06a4f;
+  --amber: #c89f5f;
+
+  /* 鉄（深色：hero / footer / カード背景） */
+  --iron: #1c1a18;
+  --iron-2: #2b2723;
+  --copper: #b87333;
+}
+
+/* ヒーロー：鉄黒グラデ＋金/銅の光 */
+.hero__bg { background-image: linear-gradient(135deg, #2b2723 0%, #14110e 100%); }
+.hero::before { background: linear-gradient(180deg, rgba(18,15,12,0.55) 0%, rgba(18,15,12,0.78) 60%, rgba(12,10,8,0.93) 100%); }
+.hero::after {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(212,175,55,0.16) 0%, transparent 42%),
+    radial-gradient(circle at 80% 70%, rgba(184,115,51,0.16) 0%, transparent 52%);
+}
+.hero h1 .accent { background: linear-gradient(135deg, #f0d896 0%, #d4af37 45%, #b87333 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* カード画像プレースホルダ＆詳細ヒーロー：鉄黒 */
+.card__img { background: linear-gradient(135deg, #2b2723 0%, #14110e 100%); }
+.detail-hero__bg { background-image: linear-gradient(135deg, #2b2723 0%, #14110e 100%); }
+.detail-hero::before { background: linear-gradient(180deg, rgba(18,15,12,0.4) 0%, rgba(18,15,12,0.85) 100%); }
+
+/* フッター：鉄黒 */
+.site-footer { background: linear-gradient(180deg, #1c1a18 0%, #0c0a08 100%); }
+
+/* 影色を銅/鉄トーンに補正 */
+.btn:hover { box-shadow: 0 12px 24px rgba(160,106,53,0.35); }
+.card:hover { box-shadow: 0 20px 40px rgba(28,26,24,0.18); }
+.discover-tile:hover { box-shadow: 0 20px 40px rgba(28,26,24,0.12); }
+
+/* discover タイルのアイコン地：銅金 */
+.discover-tile__icon { background: linear-gradient(135deg, #f4ead4 0%, #e4cb96 100%); color: var(--green-deeper); }
+
+/* ふるさと納税カード上部：銅金 */
+.furusato-card__top { background: linear-gradient(135deg, #fbf3e0 0%, #f1e2c0 100%); }
+
+/* 本物vs偽物 注意喚起カード */
+.warn-card {
+  background: linear-gradient(135deg, #fff8ee 0%, #fbeede 100%);
+  border: 1px solid #e8d3a8;
+  border-left: 4px solid var(--copper);
+  border-radius: 14px;
+  padding: 28px 30px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.warn-card__icon {
+  flex-shrink: 0;
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--copper) 0%, #8a5424 100%);
+  color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.warn-card__icon .icon-svg { width: 26px; height: 26px; }
+.warn-card h3 { font-family: var(--serif); font-size: 20px; margin-bottom: 8px; color: var(--green-deeper); }
+.warn-card p { font-size: 14px; color: var(--sub); line-height: 1.85; }
+.warn-card .section__more { margin-top: 14px; }
+
+/* 系統（盛岡/水沢）2極のリージョンタイルを2列に */
+.region-grid--2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 768px) { .region-grid--2 { grid-template-columns: 1fr; } }

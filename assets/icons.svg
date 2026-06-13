@@ -86,5 +86,26 @@
       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
       <circle cx="12" cy="12" r="3"/>
     </symbol>
+    <symbol id="i-kettle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 14a8 6 0 0016 0v-1a8 5 0 00-16 0v1z"/>
+      <path d="M6 9c1.2-3 10.8-3 12 0"/>
+      <path d="M19 11l2-1.5"/>
+      <path d="M11 4h2"/>
+      <path d="M12 4v3"/>
+    </symbol>
+    <symbol id="i-pattern" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <circle cx="6" cy="6" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="18" cy="6" r="1.5"/>
+      <circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>
+      <circle cx="6" cy="18" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/>
+    </symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3c1.5 4 5 5.5 5 9.5A5 5 0 017 12.5c0-1.8.8-3 1.8-4 .2 1.8 1.2 2.7 2.2 2.7 1.2-1.8-1.2-4-1.2-8.2z"/>
+    </symbol>
+    <symbol id="i-yen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 5l5 7 5-7"/>
+      <path d="M12 12v7"/>
+      <path d="M8 14h8"/>
+      <path d="M8 17h8"/>
+    </symbol>
   </defs>
 </svg>
