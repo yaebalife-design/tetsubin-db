@@ -1,0 +1,6 @@
+# 改行コードをLFに統一（build_tetsubin.py が LF で出力するため、CRLF差分ノイズを防ぐ）
+* text=auto eol=lf
+*.webp binary
+*.png binary
+*.jpg binary
+*.ico binary
