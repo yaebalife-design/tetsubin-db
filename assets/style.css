@@ -1661,6 +1661,8 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 .discover-grid--4 .discover-tile:nth-child(3) { --tile-bg: url('images/axis_heat.webp'); }
 .discover-grid--4 .discover-tile:nth-child(4) { --tile-bg: url('images/axis_budget.webp'); }
 
-/* ヘッダーのロゴマーク（鉄瓶アイコンを金で） */
-.logo a { display: inline-flex; align-items: center; gap: 7px; }
-.logo__mark { width: 23px; height: 23px; color: var(--gold); flex-shrink: 0; }
+/* ヘッダーのロゴ（黒丸＋金の鉄瓶マーク＋明朝ワードマーク） */
+.logo a { display: inline-flex; align-items: center; gap: 9px; }
+.logo__badge { width: 34px; height: 34px; flex-shrink: 0; display: block; border-radius: 50%; box-shadow: 0 2px 8px rgba(20,17,14,0.25); }
+.logo__name { font-family: var(--serif); font-weight: 700; font-size: 20px; letter-spacing: 0.04em; color: var(--ink); line-height: 1; }
+.logo__name .db { color: var(--copper); margin-left: 1px; letter-spacing: 0.02em; }
