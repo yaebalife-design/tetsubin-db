@@ -1784,6 +1784,10 @@ html { scroll-behavior: smooth; }
 .reveal.reveal-in .card:nth-child(6) { transition-delay: .44s; }
 .reveal.reveal-in .card:nth-child(7) { transition-delay: .52s; }
 .reveal.reveal-in .card:nth-child(8) { transition-delay: .60s; }
+.reveal.reveal-in .card:nth-child(9) { transition-delay: .68s; }
+.reveal.reveal-in .card:nth-child(10) { transition-delay: .76s; }
+/* 容量・価格が非公開の銘柄(田山等)で空のスペック行が余白を作らないように */
+.bottle__spec:empty { display: none; margin: 0; }
 .reveal.reveal-in .chip:nth-child(1) { transition-delay: .03s; }
 .reveal.reveal-in .chip:nth-child(2) { transition-delay: .07s; }
 .reveal.reveal-in .chip:nth-child(3) { transition-delay: .11s; }
