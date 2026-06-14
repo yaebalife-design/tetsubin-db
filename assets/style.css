@@ -1694,3 +1694,28 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 .card__img > div { align-self: flex-start; padding-top: 4px; }
 .card__img-name { text-shadow: 0 2px 18px rgba(0,0,0,0.85), 0 0 2px rgba(0,0,0,0.5); }
 .card__img-romaji, .card__img-area { text-shadow: 0 1px 10px rgba(0,0,0,0.8); }
+
+/* ========== 銘柄ページ：商品詳細レイアウト（2カラム＋追従スペックカード） ========== */
+.item-layout { display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 44px; align-items: start; margin-top: 28px; }
+@media (max-width: 900px) { .item-layout { grid-template-columns: 1fr; gap: 28px; } }
+.item-main > section:first-child, .item-main > p:first-child { margin-top: 0; }
+.item-side { position: sticky; top: 88px; }
+@media (max-width: 900px) { .item-side { position: static; } }
+.item-spec-card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 24px; box-shadow: var(--shadow-md);
+}
+.item-spec-card__price { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--green-dark); line-height: 1.2; letter-spacing: -0.01em; }
+.item-spec-card__price small { font-size: 11px; color: var(--sub); font-weight: 400; display: block; margin-bottom: 4px; letter-spacing: 0.06em; }
+.item-spec-list { list-style: none; margin: 18px 0 20px; padding: 0; border-top: 1px solid var(--line); }
+.item-spec-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.item-spec-list li .k { color: var(--sub); white-space: nowrap; }
+.item-spec-list li .v { font-weight: 600; text-align: right; }
+.item-spec-card h2 { font-size: 15px !important; margin: 4px 0 10px !important; }
+.item-side .affiliate-section, .item-side .affiliate-btns { margin-top: 0; }
+.item-side .affiliate-btns { flex-direction: column; gap: 10px; }
+.item-side .affiliate-btn { justify-content: center; }
+.item-side section { margin: 0 !important; }
+/* 特徴・お手入れの見出し下に細い金ライン */
+.item-main h2 { padding-bottom: 8px; border-bottom: 1px solid var(--line); position: relative; }
+.item-main h2::after { content: ""; position: absolute; left: 0; bottom: -1px; width: 44px; height: 2px; background: linear-gradient(90deg, var(--green), var(--gold)); }
