@@ -1642,3 +1642,25 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 /* 系統（盛岡/水沢）2極のリージョンタイルを2列に */
 .region-grid--2 { grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 768px) { .region-grid--2 { grid-template-columns: 1fr; } }
+
+/* discover タイルに背景画像＋ベール（saketto axis 方式の応用：ホバーで veil を薄め画像を濃く） */
+@property --veil { syntax: "<number>"; inherits: false; initial-value: 0.93; }
+.discover-grid--4 .discover-tile {
+  --veil: 0.93;
+  background-image:
+    linear-gradient(rgba(245,241,234,var(--veil)), rgba(245,241,234,var(--veil))),
+    var(--tile-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.3s, --veil 0.5s var(--ease);
+}
+.discover-grid--4 .discover-tile:hover { --veil: 0.76; }
+.discover-grid--4 .discover-tile:nth-child(1) { --tile-bg: url('images/axis_pattern.webp'); }
+.discover-grid--4 .discover-tile:nth-child(2) { --tile-bg: url('images/axis_capacity.webp'); }
+.discover-grid--4 .discover-tile:nth-child(3) { --tile-bg: url('images/axis_heat.webp'); }
+.discover-grid--4 .discover-tile:nth-child(4) { --tile-bg: url('images/axis_budget.webp'); }
+
+/* ヘッダーのロゴマーク（鉄瓶アイコンを金で） */
+.logo a { display: inline-flex; align-items: center; gap: 7px; }
+.logo__mark { width: 23px; height: 23px; color: var(--gold); flex-shrink: 0; }
