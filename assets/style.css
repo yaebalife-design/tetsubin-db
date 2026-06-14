@@ -1661,6 +1661,22 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 .discover-grid--4 .discover-tile:nth-child(3) { --tile-bg: url('images/axis_heat.webp'); }
 .discover-grid--4 .discover-tile:nth-child(4) { --tile-bg: url('images/axis_budget.webp'); }
 
+/* 模様タイル：模様テクスチャ画像を生成りベール越しに敷く（休息時から薄く模様が見え、ホバーで濃く） */
+@property --pveil { syntax: "<number>"; inherits: false; initial-value: 0.85; }
+.region-tile.pattern-tile {
+  --pveil: 0.85;
+  background-image:
+    linear-gradient(rgba(245,241,234,var(--pveil)), rgba(245,241,234,var(--pveil))),
+    var(--tile-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.3s, --pveil 0.5s var(--ease);
+}
+.region-tile.pattern-tile::before { display: none; } /* 色ブロブを消して模様画像を見せる */
+.region-tile.pattern-tile:hover { --pveil: 0.64; }
+.region-tile.pattern-tile .region-tile__name { text-shadow: 0 1px 10px rgba(245,241,234,0.85); }
+
 /* ヘッダーのロゴ（黒丸＋金の鉄瓶マーク＋明朝ワードマーク） */
 .logo a { display: inline-flex; align-items: center; gap: 9px; }
 .logo__badge { width: 34px; height: 34px; flex-shrink: 0; display: block; border-radius: 50%; box-shadow: 0 2px 8px rgba(20,17,14,0.25); }
