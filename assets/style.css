@@ -1719,3 +1719,109 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 /* 特徴・お手入れの見出し下に細い金ライン */
 .item-main h2 { padding-bottom: 8px; border-bottom: 1px solid var(--line); position: relative; }
 .item-main h2::after { content: ""; position: absolute; left: 0; bottom: -1px; width: 44px; height: 2px; background: linear-gradient(90deg, var(--green), var(--gold)); }
+
+/* ===================================================================
+   Apple風リファインメント（2026/06/14 トップ刷新・末尾上書き）
+   ねらい：大きな余白／洗練タイポ／スクロールでふわっと立ち上がる演出。
+   既存ルールをカスケードで上書き（このブロックを丸ごと消せば元に戻る）。
+   =================================================================== */
+:root { --ease-expo: cubic-bezier(.16,1,.3,1); }
+
+html { scroll-behavior: smooth; }
+
+/* --- スクロール演出：より大きく・なめらかに立ち上げる --- */
+.reveal {
+  transform: translateY(48px);
+  transition: opacity 1s var(--ease-expo), transform 1s var(--ease-expo);
+  will-change: opacity, transform;
+}
+.reveal.reveal-in { transform: none; }
+
+/* 子要素（タイル・カード・チップ・産地・警告）を順番にふわっと出す */
+.reveal .discover-tile,
+.reveal .card,
+.reveal .chip,
+.reveal .region-tile,
+.reveal .warn-card {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .85s var(--ease-expo), transform .85s var(--ease-expo);
+}
+.reveal.reveal-in .discover-tile,
+.reveal.reveal-in .card,
+.reveal.reveal-in .chip,
+.reveal.reveal-in .region-tile,
+.reveal.reveal-in .warn-card { opacity: 1; transform: none; }
+
+/* stagger（流れるように1枚ずつ） */
+.reveal.reveal-in .discover-tile:nth-child(1),
+.reveal.reveal-in .card:nth-child(1),
+.reveal.reveal-in .region-tile:nth-child(1) { transition-delay: .04s; }
+.reveal.reveal-in .discover-tile:nth-child(2),
+.reveal.reveal-in .card:nth-child(2),
+.reveal.reveal-in .region-tile:nth-child(2) { transition-delay: .12s; }
+.reveal.reveal-in .discover-tile:nth-child(3),
+.reveal.reveal-in .card:nth-child(3) { transition-delay: .20s; }
+.reveal.reveal-in .discover-tile:nth-child(4),
+.reveal.reveal-in .card:nth-child(4) { transition-delay: .28s; }
+.reveal.reveal-in .card:nth-child(5) { transition-delay: .36s; }
+.reveal.reveal-in .card:nth-child(6) { transition-delay: .44s; }
+.reveal.reveal-in .card:nth-child(7) { transition-delay: .52s; }
+.reveal.reveal-in .card:nth-child(8) { transition-delay: .60s; }
+.reveal.reveal-in .chip:nth-child(1) { transition-delay: .03s; }
+.reveal.reveal-in .chip:nth-child(2) { transition-delay: .07s; }
+.reveal.reveal-in .chip:nth-child(3) { transition-delay: .11s; }
+.reveal.reveal-in .chip:nth-child(4) { transition-delay: .15s; }
+.reveal.reveal-in .chip:nth-child(5) { transition-delay: .19s; }
+.reveal.reveal-in .chip:nth-child(6) { transition-delay: .23s; }
+.reveal.reveal-in .chip:nth-child(7) { transition-delay: .27s; }
+.reveal.reveal-in .chip:nth-child(8) { transition-delay: .31s; }
+
+/* --- ヒーロー：縦に伸ばし、余白とタイポを格上げ --- */
+.hero { min-height: 88vh; padding: 132px 24px; }
+.hero__inner { max-width: 960px; }
+.hero__eyebrow { margin-bottom: 26px; letter-spacing: 0.34em; }
+.hero h1 {
+  font-size: clamp(40px, 6.4vw, 74px);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  margin-bottom: 26px;
+}
+.hero__divider { margin-bottom: 30px; }
+.hero p {
+  font-size: clamp(15px, 1.55vw, 19px);
+  line-height: 1.95;
+  max-width: 660px;
+  margin-bottom: 52px;
+}
+
+/* --- セクション：余白を大きく取り、ゆったりとした呼吸に --- */
+.section { margin-bottom: 132px; }
+.section:first-of-type { margin-top: 24px; }
+.container { padding-top: 72px; }
+
+/* --- ホバー：なめらかに浮き上がる（Apple的なイージング） --- */
+.discover-tile, .card, .region-tile {
+  transition: transform .5s var(--ease-expo), box-shadow .5s var(--ease-expo), border-color .3s var(--ease-expo);
+}
+.discover-tile:hover, .card:hover { transform: translateY(-6px); }
+.region-tile:hover { transform: translateY(-4px); }
+
+/* --- モーション控えめ設定の尊重（アクセシビリティ） --- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal,
+  .reveal .discover-tile, .reveal .card, .reveal .chip, .reveal .region-tile, .reveal .warn-card {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .hero__bg { animation: none !important; }
+}
+
+/* --- スマホ：余白を詰めて間延びを防ぐ --- */
+@media (max-width: 768px) {
+  .hero { min-height: 78vh; padding: 104px 22px; }
+  .section { margin-bottom: 84px; }
+  .container { padding-top: 48px; }
+}
