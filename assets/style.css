@@ -1779,6 +1779,9 @@ html { scroll-behavior: smooth; }
 
 /* --- ヒーロー：縦に伸ばし、余白とタイポを格上げ --- */
 .hero { min-height: 88vh; padding: 132px 24px; }
+/* ヒーロー本文は「文節のかたまり」単位でのみ折り返す（行頭の「・」や単語の途中割れを防ぐ） */
+.hero p .nbk { white-space: nowrap; }
+.hero p { text-wrap: pretty; }
 .hero__inner { max-width: 960px; }
 .hero__eyebrow { margin-bottom: 26px; letter-spacing: 0.34em; }
 .hero h1 {
