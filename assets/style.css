@@ -15,6 +15,18 @@ img { max-width: 100%; display: block; }
 button { font-family: inherit; }
 
 /* ========== Color Palette ========== */
+/* 【:root は2段構成】
+   ここ（上段）＝ベーストークン定義。下段の「南部鉄瓶テーマ上書き」:root（ファイル末尾付近・
+   「南部鉄瓶-DB テーマ上書き」ブロック内）が同名の色トークンを後勝ちで上書きする。
+   ・色トークン（--bg / --paper / --ink / --sub / --line / --gold* / --rose / --amber 等）は
+     下段が実際の描画値（黒×銅×金）。この上段の値は上書きされるため描画には出ない“既定値”。
+     色を変えたい場合は必ず下段を編集すること（ここを直しても効かない）。
+   ・--shadow-* / --serif / --sans / --ease はここだけで定義される“生きた”トークン（下段に無い）。
+     このブロックは削除・改名しないこと。
+   【--green の意味ずれ注意】南部鉄瓶では変数名 --green に「銅色(#a06a35)」を格納して流用中
+   （下段で定義）。名前と色がずれているが後勝ちで正しい銅色が出るため、副作用回避のため今は
+   リネームせず据え置き（TODO: 将来 --accent 系へ段階リネーム）。
+   ジン緑（#2d5a3d 系）の --green 定義はデッド値のため既に削除済み。 */
 :root {
   --bg: #faf8f3;
   --paper: #ffffff;
@@ -24,9 +36,6 @@ button { font-family: inherit; }
   --line: #e8e3d4;
   --line-light: #f1ede0;
 
-  --green: #2d5a3d;
-  --green-dark: #1e3d29;
-  --green-deeper: #14291c;
   --gold: #b8975c;
   --gold-light: #d4b87f;
   --gold-deep: #8b6f3f;
@@ -742,6 +751,14 @@ h1, h2, h3, h4 {
 .bottle__img--product a { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .bottle__img--product img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
 
+/* 画像を持たない銘柄カード（.bottle__img が無く .bottle__info のみ）。
+   工房ページの銘柄一覧など、商品画像を用意していない銘柄で使用（約68箇所）。
+   子要素は .bottle__info 単一のため flex gap は視覚的に無効だが、
+   画像スロットを予約しないことを明示し、info が全幅を占める現状描画を固定する。
+   （フルワイドのテキストブロックとして表示。見た目は現状のまま） */
+.bottle--no-img { gap: 0; }
+.bottle--no-img .bottle__info { width: 100%; }
+
 .btn-affiliate {
   display: inline-flex;
   align-items: center;
@@ -1431,9 +1448,6 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
   border: 1px solid var(--line);
   overflow: hidden;
 }
-.map-placeholder::before {
-  content: "🗾"; font-size: 220px; opacity: 0.12; position: absolute;
-}
 .map-placeholder__overlay {
   position: relative;
   text-align: center;
@@ -1847,4 +1861,36 @@ html { scroll-behavior: smooth; }
   .hero { min-height: 78vh; padding: 104px 22px; }
   .section { margin-bottom: 84px; }
   .container { padding-top: 48px; }
+}
+
+/* ==================================================
+   Focus indicator (WCAG 2.4.7) — for keyboard nav
+   ================================================== */
+:where(a, button, [role="button"], summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.affiliate-btn:focus-visible,
+.btn:focus-visible {
+  outline-offset: 4px;
+}
+
+/* ========== Numbered badge (replaces circled unicode) ========== */
+.num-badge {
+  display: inline-block;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  margin-right: 6px;
+  border: 1px solid var(--copper);
+  border-radius: 50%;
+  color: var(--copper);
+  font-family: var(--serif);
+  font-size: 0.72em;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+  vertical-align: 2px;
+  box-sizing: border-box;
 }

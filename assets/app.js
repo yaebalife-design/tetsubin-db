@@ -37,6 +37,7 @@
     if (!btn || !header) return;
     btn.addEventListener('click', function () {
       header.classList.toggle('nav-open');
+      btn.setAttribute('aria-expanded', String(header.classList.contains('nav-open')));
     });
   }
 
