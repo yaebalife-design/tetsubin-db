@@ -1577,7 +1577,8 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
   --paper: #ffffff;
   --ink: #1a1714;
   --sub: #6f6760;
-  --sub-2: #948b82;
+  /* WCAG AA(4.5:1)を満たすよう微調整（旧#948b82は約3.3:1でAA未達）。黒×銅×金の暖グレー系は維持。 */
+  --sub-2: #7d746a;
   --line: #e7e0d3;
   --line-light: #f2ece1;
 
@@ -1893,4 +1894,15 @@ html { scroll-behavior: smooth; }
   text-align: center;
   vertical-align: 2px;
   box-sizing: border-box;
+}
+
+/* ========== Reduced motion — blanket safety net (WCAG 2.3.3) ==========
+   上部の限定ブロックはreveal/heroのみ対象。無限shimmer等も含め全アニメ/遷移を抑止する。 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

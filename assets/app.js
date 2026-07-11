@@ -35,9 +35,19 @@
     var btn = document.querySelector('.nav-toggle');
     var header = document.querySelector('.site-header');
     if (!btn || !header) return;
+    function setOpen(open) {
+      header.classList.toggle('nav-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
     btn.addEventListener('click', function () {
-      header.classList.toggle('nav-open');
-      btn.setAttribute('aria-expanded', String(header.classList.contains('nav-open')));
+      setOpen(!header.classList.contains('nav-open'));
+    });
+    // Escで閉じてトグルにフォーカスを戻す（キーボード操作のため）
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && header.classList.contains('nav-open')) {
+        setOpen(false);
+        btn.focus();
+      }
     });
   }
 
