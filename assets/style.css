@@ -1812,8 +1812,11 @@ html { scroll-behavior: smooth; }
 .reveal.reveal-in .chip:nth-child(7) { transition-delay: .27s; }
 .reveal.reveal-in .chip:nth-child(8) { transition-delay: .31s; }
 
-/* --- ヒーロー：縦に伸ばし、余白とタイポを格上げ --- */
-.hero { min-height: 88vh; padding: 132px 24px; }
+/* --- ヒーロー：余白とタイポを格上げ --- */
+/* ⚠ 高さに vh を使わないこと。88vh にしていたため、縦の大きい画面ほどヒーローが
+   際限なく伸び、2544x1266 の画面で 1,114px＝画面の88% を占めていた（GIN-DBは663px＝52%）。
+   固定px＋padding で頭打ちにする。 */
+.hero { min-height: 620px; padding: 104px 24px; }
 /* ヒーロー本文は「文節のかたまり」単位でのみ折り返す（行頭の「・」や単語の途中割れを防ぐ） */
 .hero p .nbk { white-space: nowrap; }
 .hero p { text-wrap: pretty; }
@@ -1859,7 +1862,7 @@ html { scroll-behavior: smooth; }
 
 /* --- スマホ：余白を詰めて間延びを防ぐ --- */
 @media (max-width: 768px) {
-  .hero { min-height: 78vh; padding: 104px 22px; }
+  .hero { min-height: 460px; padding: 84px 22px; }
   .section { margin-bottom: 84px; }
   .container { padding-top: 48px; }
 }
