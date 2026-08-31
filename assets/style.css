@@ -1174,8 +1174,21 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
   color: white;
   border-color: #ff9900;
 }
+/* Yahoo!ショッピング（2026-08-31 提携）。ブランドカラーは購入ボタンにだけ使う方針。 */
+.affiliate-btn--yahoo {
+  background: linear-gradient(135deg, #4a0f8c 0%, #7b0dbf 100%);
+  color: white;
+  border-color: #7b0dbf;
+}
+.affiliate-btn--yahoo:hover {
+  background: linear-gradient(135deg, #5c17a8 0%, #9420d9 100%);
+  border-color: #a94ae8;
+  box-shadow: 0 6px 18px rgba(123, 13, 191, 0.45);
+  color: white;
+}
 .affiliate-btn--rakuten .affiliate-btn__icon,
-.affiliate-btn--amazon .affiliate-btn__icon {
+.affiliate-btn--amazon .affiliate-btn__icon,
+.affiliate-btn--yahoo .affiliate-btn__icon {
   color: white;
 }
 .affiliate-btn--rakuten:hover {
