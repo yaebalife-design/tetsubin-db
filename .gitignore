@@ -145,3 +145,6 @@ vite.config.ts.timestamp-*
 # 検証作業の一時ファイル
 _*.txt
 _*.json
+
+# wrangler のローカルキャッシュ。アカウント名（＝メールアドレス）が入るので絶対にコミットしない
+.wrangler/
