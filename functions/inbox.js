@@ -46,6 +46,45 @@ function slowEquals(a, b) {
   return diff === 0;
 }
 
+/** IPは生で持たない。ハッシュにして数えるだけにする */
+async function ipHash(ip, salt) {
+  const d = await crypto.subtle.digest("SHA-256", enc.encode(String(salt) + "|" + String(ip)));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+}
+
+const LOCK_WINDOW_MS = 15 * 60 * 1000;   // 15分
+const LOCK_MAX = 8;                      // この回数を超えたらロック
+
+async function isLocked(env, iph) {
+  try {
+    const since = new Date(Date.now() - LOCK_WINDOW_MS).toISOString();
+    const r = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM login_failures WHERE ip = ?1 AND at > ?2"
+    ).bind(iph, since).first();
+    return ((r && r.n) || 0) >= LOCK_MAX;
+  } catch (e) {
+    // 表が無い・DBが不調でも締め出されないよう、判定は素通しにする
+    return false;
+  }
+}
+
+async function recordFailure(env, iph) {
+  try {
+    await env.DB.prepare("INSERT INTO login_failures (ip, at) VALUES (?1, ?2)")
+      .bind(iph, new Date().toISOString()).run();
+    await env.DB.prepare("DELETE FROM login_failures WHERE at < ?1")
+      .bind(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).run();
+  } catch (e) {
+    // 記録できなくてもログイン処理は続ける
+  }
+}
+
+async function clearFailures(env, iph) {
+  try {
+    await env.DB.prepare("DELETE FROM login_failures WHERE ip = ?1").bind(iph).run();
+  } catch (e) {}
+}
+
 async function makeToken(secret) {
   const exp = String(Date.now() + TTL_MS);
   return `${exp}.${await hmac(secret, exp)}`;
@@ -220,14 +259,24 @@ export async function onRequest({ request, env }) {
     const action = String(form.get("action") || "");
 
     if (action === "login") {
+      const iph = await ipHash(request.headers.get("cf-connecting-ip") || "", env.INBOX_SECRET);
+
+      // 同じIPから15分で8回失敗していたら、正しいパスワードでも受け付けない
+      if (await isLocked(env, iph)) {
+        return html(429, loginPage("試行回数が多すぎます。15分ほどおいてからお試しください。"));
+      }
+
       if (slowEquals(form.get("password") || "", env.INBOX_PASSWORD)) {
+        await clearFailures(env, iph);
         const token = await makeToken(env.INBOX_SECRET);
         return html(303, "", {
           location: "/inbox",
           "set-cookie": cookieHeader(encodeURIComponent(token), Math.floor(TTL_MS / 1000)),
         });
       }
-      // 総当たりを遅くする
+
+      await recordFailure(env, iph);
+      // 1回ずつを遅くする（回数制限と併用）
       await new Promise((r) => setTimeout(r, 1200));
       return html(401, loginPage("パスワードが違います。"));
     }

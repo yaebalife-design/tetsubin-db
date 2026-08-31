@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /inbox
 
 Sitemap: https://tetsubin-db.com/sitemap.xml
