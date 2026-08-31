@@ -62,6 +62,84 @@ async function verifyTurnstile(secret, token, ip) {
   }
 }
 
+/* ---- Googleスプレッドシートへの追記 ----------------------------------------
+ * サービスアカウントのJWTでアクセストークンを取り、対象タブに1行 append する。
+ * 鍵は環境変数（暗号化シークレット）にだけ置き、コードにもHTMLにも書かない。
+ * 失敗しても D1 に控えが残るので、問い合わせ自体は失われない。
+ */
+function b64urlFromBytes(buf) {
+  let s = "";
+  const a = new Uint8Array(buf);
+  for (let i = 0; i < a.length; i++) s += String.fromCharCode(a[i]);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function b64urlFromString(str) {
+  return b64urlFromBytes(new TextEncoder().encode(str));
+}
+
+/** PEM(PKCS#8) を Web Crypto の鍵に読み込む */
+async function importKey(pem) {
+  const body = pem
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\s+/g, "");
+  const raw = Uint8Array.from(atob(body), (c) => c.charCodeAt(0));
+  return crypto.subtle.importKey(
+    "pkcs8", raw.buffer,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false, ["sign"]
+  );
+}
+
+async function serviceAccountToken(email, pem) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = b64urlFromString(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claim = b64urlFromString(JSON.stringify({
+    iss: email,
+    scope: "https://www.googleapis.com/auth/spreadsheets",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600,
+  }));
+  const key = await importKey(pem);
+  const sig = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(header + "." + claim));
+  const jwt = header + "." + claim + "." + b64urlFromBytes(sig);
+
+  const r = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwt,
+    }),
+  });
+  if (!r.ok) return null;
+  return (await r.json()).access_token || null;
+}
+
+async function appendToSheet(env, row) {
+  const id = env.SHEETS_ID;
+  const tab = env.SHEETS_TAB;
+  if (!id || !tab || !env.GOOGLE_SA_EMAIL || !env.GOOGLE_SA_KEY) return false;
+  try {
+    const token = await serviceAccountToken(env.GOOGLE_SA_EMAIL, env.GOOGLE_SA_KEY);
+    if (!token) return false;
+    const url = "https://sheets.googleapis.com/v4/spreadsheets/" + encodeURIComponent(id)
+      + "/values/" + encodeURIComponent(tab) + "!A1:H1:append"
+      + "?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS";
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { authorization: "Bearer " + token, "content-type": "application/json" },
+      body: JSON.stringify({ values: [row] }),
+    });
+    return r.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function onRequestPost({ request, env }) {
   let body;
   try {
@@ -120,6 +198,19 @@ export async function onRequestPost({ request, env }) {
       // 例外の中身は返さない
     }
   }
+
+  // --- スプレッドシートへ追記（本命）
+  const sheetRow = [
+    at.replace("T", " ").slice(0, 19),
+    kind,
+    name,
+    email,
+    url,
+    country,
+    message,
+    "未対応",
+  ];
+  if (await appendToSheet(env, sheetRow)) stored = true;
 
   // --- 外部への転送（環境変数が設定されている場合だけ。既定では使わない）
   if (env.CONTACT_WEBHOOK) {
