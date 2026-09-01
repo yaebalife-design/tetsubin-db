@@ -192,6 +192,39 @@ h1, h2, h3, h4 {
    ※ .container--narrow は他の56ページが使っているので別クラスにしている。 */
 .container--article { max-width: 740px; }
 
+/* ==================================================
+   本文の行の長さの上限（サイト全体）
+   ==================================================
+   2026-09-02 実測: ページによって 1行41〜95字とバラバラだった。
+   日本語は1行35〜45字を超えると次の行の頭を見失いやすい。
+   全角1文字＝1em なので em で上限を置けば、フォントサイズが変わっても字数は一定になる。
+   カード内の短い段落は元から44emより狭いので影響しない。
+   中央寄せの段落だけは左に寄ってしまうので、左右marginをautoにして中央を保つ。 */
+main p { max-width: 44em; }
+main [style*="text-align:center"] p,
+main p[style*="text-align:center"],
+main [align="center"] p { margin-left: auto; margin-right: auto; }
+
+/* 逆引きページ（模様・容量・予算・熱源）の説明文。
+   カードのグリッドは 1280px いっぱい使ってよいが、**文章まで1280pxで流すと
+   1行88字**になっていた（2026-09-02 実測。日本語は35〜45字が目安）。
+   文章のかたまりだけ幅を絞る。 */
+.intro-note {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 26px;
+  max-width: 720px;   /* 内寸670px÷15px＝約44字/行 */
+}
+.section-lede {
+  font-size: 15px;
+  color: var(--sub);
+  line-height: 1.9;
+  margin-bottom: 14px;
+  max-width: 700px;
+}
+
 /* 表・図版だけは本文より広く使えるようにする（3〜4列の表が窮屈になるため）。
    本文740pxに対して左右に食い出す。画面が狭いときは食い出さない。 */
 .a-wide,
