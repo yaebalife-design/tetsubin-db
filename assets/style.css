@@ -182,6 +182,34 @@ h1, h2, h3, h4 {
 }
 .container--narrow { max-width: 880px; }
 
+/* ==================================================
+   ガイド記事のレイアウト
+   ==================================================
+   なぜ 880px をやめたか（2026-09-02 実測）:
+   本文14px・幅880px だと **PCで1行57字** になっていた。日本語は1行35〜45字を
+   超えると次の行の頭を見失いやすい。本文を16pxに上げて幅を740pxに絞ると
+   1行45字前後に収まる。スマホは元から24字で問題なかったので幅は触らない。
+   ※ .container--narrow は他の56ページが使っているので別クラスにしている。 */
+.container--article { max-width: 740px; }
+
+/* 表・図版だけは本文より広く使えるようにする（3〜4列の表が窮屈になるため）。
+   本文740pxに対して左右に食い出す。画面が狭いときは食い出さない。 */
+.a-wide,
+.container--article .article-table-wrap {
+  width: calc(100% + 120px);
+  margin-left: -60px;
+  margin-right: -60px;
+  max-width: none;
+}
+@media (max-width: 900px) {
+  .a-wide,
+  .container--article .article-table-wrap {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
 /* ========== Hero ========== */
 .hero {
   position: relative;
@@ -1812,7 +1840,8 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 /* ヘッダーのロゴ（黒丸＋金の鉄瓶マーク＋明朝ワードマーク） */
 .logo a { display: inline-flex; align-items: center; gap: 9px; }
 .logo__badge { width: 34px; height: 34px; flex-shrink: 0; display: block; border-radius: 50%; box-shadow: 0 2px 8px rgba(20,17,14,0.25); }
-.logo__name { font-family: var(--serif); font-weight: 700; font-size: 20px; letter-spacing: 0.04em; color: var(--ink); line-height: 1; }
+/* nowrap：スマホ(390px)でサイト名が「南部鉄瓶-」「DB」の2行に割れていたため（2026-09-02 実測） */
+.logo__name { font-family: var(--serif); font-weight: 700; font-size: 20px; letter-spacing: 0.04em; color: var(--ink); line-height: 1; white-space: nowrap; }
 .logo__name .db { color: var(--copper); margin-left: 1px; letter-spacing: 0.02em; }
 
 /* discover タイルをエディトリアル調に格上げ（番号透かし＋地なし銅アイコン＋実例タグ） */
@@ -1995,6 +2024,363 @@ html { scroll-behavior: smooth; }
 .affiliate-btn:focus-visible,
 .btn:focus-visible {
   outline-offset: 4px;
+}
+
+/* ==================================================
+   ガイド記事の見出し・本文
+   ==================================================
+   2026-09-02 実測で分かっていた問題:
+     ・H3が16.5px、本文14.5px。差が2pxしかなく見出しに見えていなかった
+     ・H2は下線1pxのみで、長い記事をスクロールすると節目が分からなかった
+   本文16px を基準に、H3=20px / H2=25px と差を付ける。 */
+.art-body {
+  font-size: 16px;
+  line-height: 1.95;
+  margin-bottom: 18px;
+}
+.art-h2 {
+  font-family: var(--serif);
+  font-size: 25px;
+  line-height: 1.45;
+  margin: 52px 0 18px;
+  padding: 2px 0 10px 16px;
+  border-left: 4px solid var(--gold);
+  border-bottom: 2px solid var(--line);
+  scroll-margin-top: 88px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+/* 節番号。目次の番号と一致させて「いま何節目か」が分かるようにする */
+.art-h2__n {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--gold-deep);
+  letter-spacing: 0.06em;
+  flex: none;
+}
+.art-h3 {
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--green-dark);
+  margin: 34px 0 10px;
+}
+.art-body + .art-h3 { margin-top: 30px; }
+
+/* リード文。本文より少し大きく、記事の入口だと分かるように。
+   色は本文とほぼ同じにする。--sub まで薄くすると、いちばん最初に読む文章が
+   いちばん読みにくいという逆転が起きる。 */
+.art-lead {
+  font-size: 17px;
+  line-height: 1.9;
+  color: var(--ink);
+  margin: 0 0 26px;
+}
+/* 記事の肩ラベル（GUIDE / 値段と相場） */
+.art-kicker {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--gold-deep);
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+.art-meta {
+  font-size: 12.5px;
+  color: var(--sub-2);
+  margin: 0 0 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+}
+.art-meta__item { display: inline-flex; align-items: center; gap: 5px; }
+
+/* 記事冒頭のヒーロー画像 */
+.art-hero { margin: 0 0 26px; }
+.art-hero img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+.art-hero figcaption {
+  font-size: 11.5px;
+  color: var(--sub-2);
+  margin-top: 7px;
+  text-align: right;
+}
+
+/* 「この記事でわかること」 */
+.art-summary {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--gold);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 18px 22px;
+  margin: 0 0 26px;
+}
+.art-summary h2 {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--green-dark);
+  margin: 0 0 10px;
+  padding: 0;
+  border: none;
+}
+.art-summary ul { margin: 0; padding-left: 20px; }
+.art-summary li { font-size: 14.5px; line-height: 1.85; margin: 5px 0; }
+
+/* 目次。番号を振って、H2の番号と対応させる */
+.art-toc {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 0 0 34px;
+}
+.art-toc > h2 {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--green-dark);
+  margin: 0 0 12px;
+  padding: 0;
+  border: none;
+}
+.art-toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: toc;
+  columns: 2;
+  column-gap: 30px;
+}
+.art-toc li {
+  counter-increment: toc;
+  margin: 0 0 9px;
+  break-inside: avoid;
+  font-size: 13.5px;
+  line-height: 1.6;
+  display: flex;
+  gap: 8px;
+}
+.art-toc li::before {
+  content: counter(toc) ".";
+  color: var(--gold-deep);
+  font-family: var(--serif);
+  font-weight: 600;
+  flex: none;
+  min-width: 18px;
+}
+.art-toc a { color: var(--ink); text-decoration: none; }
+.art-toc a:hover { color: var(--gold-deep); text-decoration: underline; }
+@media (max-width: 640px) {
+  .art-toc ol { columns: 1; }
+  .art-h2 { font-size: 21px; margin: 40px 0 14px; padding-left: 12px; }
+  .art-h3 { font-size: 18px; }
+  .art-body { font-size: 15.5px; }
+  .art-lead { font-size: 16px; }
+}
+
+/* ==================================================
+   追従サイド目次（PCのみ）
+   ==================================================
+   記事は10,000px前後＝約11画面ある。冒頭の目次は一度スクロールすると
+   見えなくなり、「あと何節あるのか」「いま何節目か」が分からなくなる。
+   本文は740pxなので、1180px以上の画面なら左側に十分な余白がある。
+   狭い画面では出さない（本文に重なるため）。 */
+.art-side {
+  display: none;
+}
+@media (min-width: 1180px) {
+  .art-side {
+    display: block;
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    left: max(16px, calc((100% - 740px) / 2 - 220px));
+    width: 196px;
+    max-height: 74vh;
+    overflow-y: auto;
+    z-index: 20;
+    font-size: 12px;
+    line-height: 1.5;
+    transition: opacity 0.25s ease;
+  }
+  .art-side::-webkit-scrollbar { width: 3px; }
+  .art-side::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+}
+.art-side__t {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--sub-2);
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+.art-side ol { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+.art-side li { counter-increment: s; margin: 0; }
+.art-side a {
+  display: flex;
+  gap: 8px;
+  padding: 5px 0 5px 10px;
+  color: var(--sub-2);
+  text-decoration: none;
+  border-left: 2px solid var(--line);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.art-side a::before {
+  content: counter(s, decimal-leading-zero);
+  font-family: var(--serif);
+  color: var(--line-strong, #d8cfc0);
+  flex: none;
+}
+.art-side a:hover { color: var(--ink); border-left-color: var(--copper); }
+/* いま読んでいる節。JSが動かなければ全部が既定色のまま＝害はない */
+.art-side a.is-here {
+  color: var(--ink);
+  font-weight: 600;
+  border-left-color: var(--gold);
+}
+.art-side a.is-here::before { color: var(--gold-deep); }
+
+/* よくある質問。開閉式にして問いを一覧できるようにする（details/summaryなのでJS不要） */
+.art-faq { border-top: 1px solid var(--line); margin: 0 0 8px; }
+.art-faq__i { border-bottom: 1px solid var(--line); }
+.art-faq__i > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 34px 16px 26px;
+  position: relative;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.art-faq__i > summary::-webkit-details-marker { display: none; }
+.art-faq__i > summary::before {
+  content: "Q";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  font-family: var(--serif);
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+/* 開閉の矢印 */
+.art-faq__i > summary::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 25px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--sub-2);
+  border-bottom: 2px solid var(--sub-2);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+.art-faq__i[open] > summary::after { transform: rotate(-135deg); }
+.art-faq__i > summary:hover { color: var(--gold-deep); }
+.art-faq__a {
+  padding: 0 8px 18px 26px;
+  font-size: 15.5px;
+  line-height: 1.95;
+  color: var(--sub);
+}
+@media (prefers-reduced-motion: reduce) {
+  .art-faq__i > summary::after { transition: none; }
+}
+
+/* ガイド一覧のカード（記事のヒーロー画像つき） */
+.guidecard {
+  display: block;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.4s cubic-bezier(.16, 1, .3, 1), box-shadow 0.4s ease, border-color 0.3s ease;
+}
+.guidecard:hover {
+  transform: translateY(-5px);
+  border-color: var(--gold);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+}
+@media (prefers-reduced-motion: reduce) {
+  .guidecard { transition: none; }
+  .guidecard:hover { transform: none; }
+}
+
+/* 記事末の「次に読みたいガイド」。ここが最も離脱しやすいので絵で見せる */
+.nextread { margin: 48px 0 8px; }
+.nextgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.nextcard {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--paper);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.35s var(--ease-expo, ease), box-shadow 0.35s ease, border-color 0.3s ease;
+}
+.nextcard img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  display: block;
+}
+.nextcard__b { display: block; padding: 13px 16px 15px; }
+.nextcard__k {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--gold-deep);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.nextcard__t {
+  display: block;
+  font-family: var(--serif);
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.nextcard:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.10);
+}
+.nextcard:hover .nextcard__t { color: var(--gold-deep); }
+@media (max-width: 640px) {
+  .nextgrid { grid-template-columns: 1fr; gap: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nextcard { transition: none; }
+  .nextcard:hover { transform: none; }
+}
+
+/* 読了プログレス。9,000px超の記事でどこまで来たかを示す */
+.art-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background: linear-gradient(90deg, var(--copper), var(--gold));
+  z-index: 60;
+  transition: width 0.1s linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .art-progress { transition: none; }
 }
 
 /* ========== Numbered badge (replaces circled unicode) ========== */
