@@ -1276,6 +1276,11 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 }
 
 /* ===== ふるさと納税ページ ===== */
+/* .fchips は絞り込みチップの目印。高さの予約はしていない。
+   一度 min-height で CLS を抑えようとしたが効かなかった。ズレの原因はチップの折り返しではなく、
+   その**上にある説明文**がWebフォントの入れ替わりで27px伸び、下の一覧ごと押し下げていたため
+   （2026-09-02 実測）。フォント入れ替えによるズレはサイト全体の課題として別途扱う。 */
+
 .furusato-ws {
   border: 1px solid var(--line);
   border-radius: 12px;
