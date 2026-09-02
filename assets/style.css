@@ -2360,6 +2360,24 @@ html { scroll-behavior: smooth; }
   .guidecard:hover { transform: none; }
 }
 
+
+/* 返礼品名 → サイトの銘柄ページへのリンク（対応が確認できたものだけ） */
+.furusato-row__link {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+.furusato-row__link:hover {
+  color: var(--gold-deep);
+  border-bottom-color: var(--gold);
+}
+.furusato-row__spec {
+  color: var(--green-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+.furusato-row__spec:hover { color: var(--gold-deep); text-decoration: underline; }
+
 /* 記事末の「次に読みたいガイド」。ここが最も離脱しやすいので絵で見せる */
 .nextread { margin: 48px 0 8px; }
 .nextgrid {
