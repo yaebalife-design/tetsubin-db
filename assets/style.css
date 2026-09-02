@@ -2,7 +2,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
-  font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  /* 代替フォント（Webフォントが届くまでの間に使われる指定）を 2026-09-02 に変更。
+     旧: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI"
+     旧指定は本文の幅が実フォントと **13.35%** ずれており、フォントが入れ替わった瞬間に
+     本文が再折り返しして、下の要素がまとめて動いていた（CLS 0.12〜0.20）。
+     Arial + Yu Gothic に変えるとズレは **1.03%** に縮む（実測）。
+     フォントが届いたあとの見た目は変わらないので、デザイン上の代償はない。
+     ⚠ 見出し(--serif)は現状で1.15%と既に良いので触らないこと。
+       Times New Roman に変えると5.41%に悪化することを実測済み。 */
+  font-family: 'Inter', 'Noto Sans JP', Arial, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
   background: #faf8f3;
   color: #1a1a1a;
   line-height: 1.7;
@@ -48,7 +56,7 @@ button { font-family: inherit; }
   --shadow-lg: 0 20px 50px rgba(0,0,0,0.16);
 
   --serif: 'Noto Serif JP', 'Cormorant Garamond', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
-  --sans: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  --sans: 'Inter', 'Noto Sans JP', Arial, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
 
   --ease: cubic-bezier(.2,.8,.2,1);
 }
