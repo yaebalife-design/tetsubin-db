@@ -166,7 +166,7 @@ h1, h2, h3, h4 {
 }
 @media (max-width: 768px) {
   .site-nav { display: none; }
-  .nav-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  .nav-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
   .site-header.nav-open .site-nav {
     display: flex;
     flex-direction: column;
@@ -175,11 +175,14 @@ h1, h2, h3, h4 {
     left: 0; right: 0;
     background: rgba(255,255,255,0.98);
     backdrop-filter: blur(12px);
-    padding: 24px;
-    gap: 18px;
+    padding: 16px 24px;
+    gap: 0;
     border-bottom: 1px solid var(--line);
     animation: fadeInDown 0.25s var(--ease);
   }
+  /* タップターゲット44px確保（WCAG 2.5.8） */
+  .site-header.nav-open .site-nav a { display: block; padding: 13px 0; min-height: 44px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .site-header.nav-open .site-nav a:last-child { border-bottom: none; }
 }
 
 /* ========== Container ========== */
@@ -1161,7 +1164,9 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
   margin-bottom: 40px;
 }
 @media (max-width: 768px) { .site-footer__cols { grid-template-columns: 1fr 1fr; gap: 28px; } }
-.site-footer h4 { color: white; margin-bottom: 14px; font-size: 14px; font-family: var(--serif); }
+/* .footer-head は見出しタグではなく<p>。h2→h4の見出しスキップ警告を全259ページで
+   出していたため非見出し化した（2026-09-02 SEO監査） */
+.site-footer h4, .site-footer .footer-head { color: white; margin-bottom: 14px; font-size: 14px; font-weight: 700; font-family: var(--serif); }
 .site-footer ul { list-style: none; }
 .site-footer li { padding: 4px 0; }
 .site-footer a:hover { color: var(--gold-light); }
@@ -1301,6 +1306,86 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 }
 .affiliate-link--rakuten:hover {
   color: #bf0000;
+}
+/* 一覧ページ用の小型購入ピルボタン。詳細ページの .affiliate-btn より軽く、
+   テキストリンクより視認性を上げる中間段階（2026-09-02 UX監査 H-4） */
+.affiliate-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  min-height: 36px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.affiliate-pill:hover { transform: translateY(-1px); }
+.affiliate-pill--rakuten { background: linear-gradient(135deg, #8c1010 0%, #bf0000 100%); }
+.affiliate-pill--rakuten:hover { box-shadow: 0 4px 12px rgba(191, 0, 0, 0.35); color: white; }
+.affiliate-pill--yahoo { background: linear-gradient(135deg, #4a0f8c 0%, #7b0dbf 100%); }
+.affiliate-pill--yahoo:hover { box-shadow: 0 4px 12px rgba(123, 13, 191, 0.35); color: white; }
+.affiliate-pill .icon-svg { color: rgba(255,255,255,0.85); flex-shrink: 0; }
+
+/* 一覧ページの並べ替えチップ（app.js initListSort が制御） */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0 6px;
+}
+.sort-bar__label { font-size: 12px; color: var(--sub); font-weight: 600; }
+.sort-chip {
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 999px;
+  padding: 7px 14px;
+  min-height: 34px;
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.sort-chip:hover { border-color: var(--gold); color: var(--gold-deep); }
+.sort-chip.active { background: linear-gradient(135deg, #14211a 0%, #1f3128 100%); color: var(--gold-light); border-color: transparent; }
+
+/* 銘柄詳細のモバイル固定CTA（≤900pxのみ表示。価格＋主要購入先へのアンカー） */
+.buy-cta-mobile { display: none; }
+@media (max-width: 900px) {
+  .buy-cta-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 60;
+    background: rgba(20, 17, 14, 0.96);
+    backdrop-filter: blur(8px);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(212, 175, 55, 0.35);
+  }
+  .buy-cta-mobile__price { color: var(--gold-light); font-weight: 700; font-size: 16px; white-space: nowrap; }
+  .buy-cta-mobile__price small { display: block; font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.55); }
+  .buy-cta-mobile__btn {
+    flex: 1;
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #8c1010 0%, #bf0000 100%);
+    text-decoration: none;
+  }
+  .buy-cta-mobile__btn--official { background: linear-gradient(135deg, #14211a 0%, #1f3128 100%); color: var(--gold-light); border: 1px solid rgba(212,175,55,0.4); }
+  .buy-cta-mobile__btn--yahoo { background: linear-gradient(135deg, #4a0f8c 0%, #7b0dbf 100%); }
+  /* 固定バーに隠れないよう本文下部へ余白（:has非対応の古いブラウザでは余白なしで軽微な重なりのみ） */
+  body:has(.buy-cta-mobile) main { padding-bottom: 76px; }
 }
 .affiliate-link--amazon:hover {
   color: #cf7800;
@@ -1923,7 +2008,11 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
 @media (max-width: 900px) { .item-layout { grid-template-columns: 1fr; gap: 28px; } }
 .item-main > section:first-child, .item-main > p:first-child { margin-top: 0; }
 .item-side { position: sticky; top: 88px; }
-@media (max-width: 900px) { .item-side { position: static; } }
+/* モバイルでは価格・スペック・購入ボタンを本文（約2,000字）より上に出す。
+   PCのstickyでは常時見えるのに、1カラム化すると最下部に落ちていた（2026-09-02 UX監査） */
+@media (max-width: 900px) {
+  .item-side { position: static; order: -1; }
+}
 .item-spec-card {
   background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
   padding: 24px; box-shadow: var(--shadow-md);

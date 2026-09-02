@@ -39,8 +39,15 @@
       header.classList.toggle('nav-open', open);
       btn.setAttribute('aria-expanded', String(open));
     }
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
       setOpen(!header.classList.contains('nav-open'));
+    });
+    // メニュー外タップで閉じる（誤タップ・閉じ方が分からない問題の対策）
+    document.addEventListener('click', function (e) {
+      if (header.classList.contains('nav-open') && !header.contains(e.target)) {
+        setOpen(false);
+      }
     });
     // Escで閉じてトグルにフォーカスを戻す（キーボード操作のため）
     document.addEventListener('keydown', function (e) {
@@ -71,40 +78,32 @@
     });
   }
 
-  // 5. Furusato page filter
-  function initFurusatoFilter() {
-    var bar = document.querySelector('.filter-bar');
-    if (!bar) return;
-    var chips = bar.querySelectorAll('.filter-chip');
-    var cards = document.querySelectorAll('.furusato-card');
-    if (!cards.length) return;
-
-    function applyFilter(f) {
-      cards.forEach(function (c) {
-        var show = false;
-        if (f === 'all') {
-          show = true;
-        } else if (f === 'amount-10000') {
-          show = parseInt(c.getAttribute('data-amount') || '0', 10) <= 10000;
-        } else if (f === 'amount-30000') {
-          show = parseInt(c.getAttribute('data-amount') || '0', 10) <= 30000;
-        } else if (f === 'award') {
-          show = c.getAttribute('data-award') === 'true';
-        } else if (f === 'set') {
-          show = c.getAttribute('data-set') === 'true';
-        } else if (f.indexOf('region-') === 0) {
-          var region = f.replace('region-', '');
-          show = c.getAttribute('data-region') === region;
-        }
-        c.style.display = show ? '' : 'none';
-      });
-    }
-
-    chips.forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        chips.forEach(function (c) { c.classList.remove('active'); });
-        chip.classList.add('active');
-        applyFilter(chip.getAttribute('data-filter') || 'all');
+  // 5. 一覧ページの並べ替え（.bottle-list 内の .bottle を data-price / data-cap で並べ替える）
+  //    ボタンは .sort-bar .sort-chip[data-sort] 。無いページでは何もしない。
+  function initListSort() {
+    var bars = document.querySelectorAll('.sort-bar');
+    if (!bars.length) return;
+    bars.forEach(function (bar) {
+      var list = bar.nextElementSibling;
+      while (list && !list.querySelector('.bottle')) list = list.nextElementSibling;
+      if (!list) return;
+      var chips = bar.querySelectorAll('.sort-chip');
+      var original = Array.prototype.slice.call(list.querySelectorAll('.bottle'));
+      function val(el, key) {
+        var v = parseFloat(el.getAttribute('data-' + key));
+        return isNaN(v) ? Infinity : v;
+      }
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          chips.forEach(function (c) { c.classList.remove('active'); });
+          chip.classList.add('active');
+          var mode = chip.getAttribute('data-sort');
+          var items = original.slice();
+          if (mode === 'price-asc') items.sort(function (a, b) { return val(a, 'price') - val(b, 'price'); });
+          else if (mode === 'price-desc') items.sort(function (a, b) { return val(b, 'price') - val(a, 'price'); });
+          else if (mode === 'cap-asc') items.sort(function (a, b) { return val(a, 'cap') - val(b, 'cap'); });
+          items.forEach(function (el) { list.appendChild(el); });
+        });
       });
     });
   }
@@ -114,7 +113,7 @@
     initHeaderShadow();
     initNavToggle();
     initCountUp();
-    initFurusatoFilter();
+    initListSort();
   }
 
   if (document.readyState === 'loading') {

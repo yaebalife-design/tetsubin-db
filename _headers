@@ -14,8 +14,10 @@
 /assets/icons.svg
   Cache-Control: public, max-age=86400
 
+# CSS/JSは全参照に ?v= キャッシュバスターが付いているため1日キャッシュでよい
+# （変更時は build_tetsubin.py の VER を上げる運用。5分だとリピーターが毎回82KBを再検証していた）
 /assets/*.css
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=86400
 
 /assets/*.js
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=86400
