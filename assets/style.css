@@ -959,30 +959,42 @@ main [align="center"] p { margin-left: auto; margin-right: auto; }
   -webkit-overflow-scrolling: touch;
   position: relative;
 }
-.article-table-wrap::after {
-  content: "→ 横スクロール";
+/* 2026-09-24: 「横スクロール」の案内は、表の外の右上に薄く出して動かさない（社長指摘。GIN-DBと同じ直し方）。
+   以前は ::after を表の枠（スクロールする箱）の中に absolute で置いていたため、横にスクロールすると
+   案内も一緒に流れて見出しに重なっていた。::before を枠の先頭に1行ぶん置き、sticky + left:0 で留める。 */
+.article-table-wrap::before {
+  content: "横にスクロールできます →";
   display: none;
-  position: absolute;
-  top: 8px;
-  right: 12px;
+  position: sticky;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  height: 16px;
+  margin-bottom: 3px;
+  padding-right: 2px;
+  text-align: right;
   font-size: 10px;
-  color: var(--gold-deep);
-  background: rgba(255,255,255,0.9);
-  padding: 2px 8px;
-  border-radius: 10px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  color: rgba(139, 111, 63, 0.5);
   pointer-events: none;
 }
+/* 2026-09-24: table-layout を fixed → auto。fixed は列幅を均等に固定するため、折り返し禁止（white-space:nowrap）の
+   セルの長い文字が隣の列にはみ出して重なっていた（「重炭酸イオン（元は14.00mg/L）」と「ほぼ変化なし」が丸かぶり）。
+   auto なら列が中身に合わせて広がり、はみ出す代わりに表全体が横スクロールになる。 */
 .article-table {
   width: 100%;
   min-width: 560px;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-size: 14px;
   margin: 0;
 }
+/* 2026-09-24: overflow-wrap:anywhere だと表の幅を決めるときに「どこでも折れる」扱いになり、
+   「53.00mg/L」が「53.」「00mg/」「L」のように数字の途中で折れていた。語の途中では折らず、入りきらないときだけ折る */
 .article-table th, .article-table td {
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 .article-table .col-center { text-align: center !important; }
 .article-table thead { background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-deeper) 100%); }
@@ -1011,7 +1023,7 @@ main [align="center"] p { margin-left: auto; margin-right: auto; }
 @media (max-width: 600px) {
   .article-table { font-size: 12.5px; min-width: 540px; }
   .article-table thead th, .article-table tbody td { padding: 10px 8px; }
-  .article-table-wrap::after { display: inline-block; }
+  .article-table-wrap::before { display: block; }
 }
 
 /* ========== Timeline ========== */
