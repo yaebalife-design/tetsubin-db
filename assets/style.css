@@ -2359,6 +2359,14 @@ html { scroll-behavior: smooth; }
   }
   .art-side::-webkit-scrollbar { width: 3px; }
   .art-side::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  /* 2026-10-19: 表を左右60pxに食い出させる指定（.a-wide / .article-table-wrap）が、左のサイド目次に約36px重なっていた
+     （目次の右端は本文の24px左）。目次が出る記事では左へは食い出さず、右だけ広げる */
+  .container--article:has(.art-side) .a-wide,
+  .container--article:has(.art-side) .article-table-wrap {
+    width: calc(100% + 60px);
+    margin-left: 0;
+    margin-right: -60px;
+  }
 }
 .art-side__t {
   font-size: 10px;
