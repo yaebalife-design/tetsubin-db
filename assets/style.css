@@ -191,7 +191,6 @@ h1, h2, h3, h4 {
   margin: 0 auto;
   padding: 64px 24px;
 }
-.container--narrow { max-width: 880px; }
 
 /* ==================================================
    ガイド記事のレイアウト
@@ -200,40 +199,53 @@ h1, h2, h3, h4 {
    本文14px・幅880px だと **PCで1行57字** になっていた。日本語は1行35〜45字を
    超えると次の行の頭を見失いやすい。本文を16pxに上げて幅を740pxに絞ると
    1行45字前後に収まる。スマホは元から24字で問題なかったので幅は触らない。
-   ※ .container--narrow は他の56ページが使っているので別クラスにしている。 */
+   ※ 2026-10-20 から .container--narrow も同じ740pxにした（下のコメント）。 */
+/* 読みもの型のページ（工房・逆引きの各一覧・本物の見分け方・規約類）も記事と同じ幅にそろえる。
+   2026-10-20 社長「幅が統一されていないからおかしい」: 880px の柱の中で、段落だけ
+   44emで止まり、見出し・箱・カードは832pxまで伸びていて、右端が3〜5通りにばらけていた。
+   柱そのものを740pxにすれば、段落も箱も同じ右端で1行46字前後に収まる。 */
+.container--narrow,
 .container--article { max-width: 740px; }
 
-/* ==================================================
-   本文の行の長さの上限（サイト全体）
-   ==================================================
-   2026-09-02 実測: ページによって 1行41〜95字とバラバラだった。
-   日本語は1行35〜45字を超えると次の行の頭を見失いやすい。
-   全角1文字＝1em なので em で上限を置けば、フォントサイズが変わっても字数は一定になる。
-   カード内の短い段落は元から44emより狭いので影響しない。
-   中央寄せの段落だけは左に寄ってしまうので、左右marginをautoにして中央を保つ。 */
-main p { max-width: 44em; }
-main [style*="text-align:center"] p,
-main p[style*="text-align:center"],
-main [align="center"] p { margin-left: auto; margin-right: auto; }
+/* 銘柄ページ（本文＋右の購入カード）。1280pxだと本文の柱が858pxになり、段落だけ
+   止めると右端がばらける。ページごと1080pxにすると本文の柱が658px（1行44字）になり、
+   上の画像帯・下の関連カードとも同じ幅でそろう。 */
+.container--item { max-width: 1080px; }
 
-/* 逆引きページ（模様・容量・予算・熱源）の説明文。
-   カードのグリッドは 1280px いっぱい使ってよいが、**文章まで1280pxで流すと
-   1行88字**になっていた（2026-09-02 実測。日本語は35〜45字が目安）。
-   文章のかたまりだけ幅を絞る。 */
+/* ==================================================
+   幅のルール（2026-10-20 作り直し）
+   ==================================================
+   1ページ＝1本の柱。段落・見出し・枠のある箱・カードは、全部その柱の幅いっぱいに置く。
+   1行の長さ（日本語は35〜45字が目安）は、段落ごとの上限ではなく**柱の幅**で決める。
+   以前は main p に 44em の上限を置いていたが、文字の大きさごとに止まる位置が違い、
+   箱やカードとも右端がそろわず「ページの中で幅がばらばら」になっていた。 */
+
+/* 段落の改行は通常のまま（右端がそろう）。2026-10-20 に試して見送ったもの:
+   - word-break:auto-phrase（文節で改行）: 最後の行が4字以下の段落は PC 16→3件に減るが、
+     全行の右端が平均2字ほど不ぞろいになり（スマホは24字中3字）、「幅がそろって見える」目的に反する。
+   - text-wrap:pretty: 日本語では効果なし（実測で件数が変わらない）。 */
+
+/* 一覧型ページ（模様・容量・予算・熱源・産地）の説明の箱。カードのグリッドと同じ
+   全幅に置き、880px以上では中を2段組にして1行を40字前後に保つ（全幅1段だと1行80字を超える）。 */
 .intro-note {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 20px 24px;
   margin-bottom: 26px;
-  max-width: 720px;   /* 内寸670px÷15px＝約44字/行 */
+}
+@media (min-width: 880px) {   /* これより狭いと1段で1行50字以下に収まる */
+  .intro-note { column-count: 2; column-gap: 56px; padding: 24px 32px; }
+  .intro-note > h2:first-child { column-span: all; }        /* 箱の題は2段にまたがる */
+  .intro-note--story > h2:first-child { column-span: none; } /* 産地の歴史は見出しも段の中 */
+  .intro-note > p:last-child { column-span: all; }          /* 末尾の「くわしく読む」リンク */
+  .intro-note h2 { break-after: avoid; }
 }
 .section-lede {
   font-size: 15px;
   color: var(--sub);
   line-height: 1.9;
   margin-bottom: 14px;
-  max-width: 700px;
 }
 
 /* 表・図版だけは本文より広く使えるようにする（3〜4列の表が窮屈になるため）。
@@ -1515,9 +1527,16 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
   margin-top: 12px;
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 10px 12px;
   align-items: center;
   position: relative;
+}
+/* 740pxの柱（工房・逆引きの一覧）では、カードの文字欄が418pxしかなく、
+   「詳細／楽天／Yahoo!／公式」の4つ（約470px）が入らず「公式サイトで見る」だけ2行目に落ちていた。
+   画像と余白を少し詰めて文字欄を約460pxにし、1行に収める（2026-10-20）。 */
+@media (min-width: 641px) {
+  .container--narrow .bottle { padding: 20px; gap: 20px; }
+  .container--narrow .bottle__img--product { width: 168px; }
 }
 
 /* ========== Icon SVG ========== */
@@ -1823,9 +1842,9 @@ a.timeline__item:hover::after { opacity: 1; right: 14px; }
   padding-left: 14px;
 }
 .static-page h3 { font-family: var(--serif); font-size: 17px; margin-top: 24px; margin-bottom: 8px; color: var(--green-dark); }
-.static-page p { font-size: 14px; line-height: 2; margin-bottom: 16px; }
+.static-page p { font-size: 15px; line-height: 2; margin-bottom: 16px; }  /* 740pxの柱で1行46字（14pxだと49字） */
 .static-page ul, .static-page ol { margin: 12px 0 16px 24px; }
-.static-page li { font-size: 14px; line-height: 2; margin-bottom: 6px; }
+.static-page li { font-size: 15px; line-height: 2; margin-bottom: 6px; }
 .static-page table:not(.article-table) {
   width: 100%; border-collapse: collapse; margin: 16px 0;
   font-size: 14px; border-radius: 8px; overflow: hidden;
