@@ -225,8 +225,11 @@ h1, h2, h3, h4 {
      全行の右端が平均2字ほど不ぞろいになり（スマホは24字中3字）、「幅がそろって見える」目的に反する。
    - text-wrap:pretty: 日本語では効果なし（実測で件数が変わらない）。 */
 
-/* 一覧型ページ（模様・容量・予算・熱源・産地）の説明の箱。カードのグリッドと同じ
-   全幅に置き、880px以上では中を2段組にして1行を40字前後に保つ（全幅1段だと1行80字を超える）。 */
+/* 一覧型ページ（模様・容量・予算・熱源・産地）の説明の箱。カードのグリッドと同じ全幅に置く。
+   PC（900px以上）は「見出しを左・本文を右」の組み方にして、本文の1行を55字前後に保つ。
+   2026-10-21 社長: 2段組（本文を真ん中で割って右の段へ続ける）は「きもい」→ 文章を途中で割らない形に変更。
+   全幅1段（1行80字）も試したが、行の頭に戻るとき迷いやすいので不採用。
+   見出しが複数ある箱（産地の歴史）は、話題ごとに細い線で区切って年表のように見せる。 */
 .intro-note {
   background: var(--paper);
   border: 1px solid var(--line);
@@ -234,12 +237,33 @@ h1, h2, h3, h4 {
   padding: 20px 24px;
   margin-bottom: 26px;
 }
-@media (min-width: 880px) {   /* これより狭いと1段で1行50字以下に収まる */
-  .intro-note { column-count: 2; column-gap: 56px; padding: 24px 32px; }
-  .intro-note > h2:first-child { column-span: all; }        /* 箱の題は2段にまたがる */
-  .intro-note--story > h2:first-child { column-span: none; } /* 産地の歴史は見出しも段の中 */
-  .intro-note > p:last-child { column-span: all; }          /* 末尾の「くわしく読む」リンク */
-  .intro-note h2 { break-after: avoid; }
+.intro-note h2 {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--green-dark);
+  margin: 0 0 10px;
+}
+.intro-note h2:not(:first-child) { margin-top: 20px; }
+.intro-note p { font-size: 15px; line-height: 1.95; margin-bottom: 10px; }
+.intro-note p:last-child { margin-bottom: 0; }
+.intro-note .intro-note__links { margin-top: 14px; font-size: 13.5px; }
+@media (min-width: 900px) {
+  .intro-note {
+    display: grid;
+    grid-template-columns: clamp(200px, 24%, 300px) minmax(0, 1fr);
+    column-gap: 56px;
+    padding: 36px 44px;
+  }
+  .intro-note > h2 { grid-column: 1; font-size: 21px; line-height: 1.6; margin: 0; padding-top: 2px; }
+  /* 左の見出しは2行に折れることがある。「ここ／を確認」のような単語の途中で折れないよう文節で改行する */
+  .intro-note > h2 { word-break: auto-phrase; text-wrap: balance; }
+  .intro-note > p { grid-column: 2; }
+  .intro-note > h2:not(:first-child),
+  .intro-note > h2:not(:first-child) + p {
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+    margin-top: 14px;
+  }
 }
 .section-lede {
   font-size: 15px;
