@@ -128,7 +128,7 @@ async function appendToSheet(env, row) {
     if (!token) return false;
     const url = "https://sheets.googleapis.com/v4/spreadsheets/" + encodeURIComponent(id)
       + "/values/" + encodeURIComponent(tab) + "!A1:H1:append"
-      + "?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS";
+      + "?valueInputOption=RAW&insertDataOption=INSERT_ROWS";
     const r = await fetch(url, {
       method: "POST",
       headers: { authorization: "Bearer " + token, "content-type": "application/json" },
@@ -140,6 +140,100 @@ async function appendToSheet(env, row) {
   }
 }
 
+/* ---- スパム対策のしきい値 --------------------------------------------------
+ * 弾いたことは相手に教えない（200 / ok:true を返す）。
+ * エラーを返すと「何が悪いか」を教えることになり、抜け方を探られるため。
+ * 弾いた分も blocked テーブルに理由付きで残す。人間を誤って落としていないか
+ * 後から確認できるようにするため。
+ */
+/* 同一IPからの上限。
+ * 最初は 1時間3通 にしていたが、**携帯キャリアや会社は多数の利用者で
+ * 同じIPを共有する**（CGNAT）。狭くすると、先に誰かが送っただけで
+ * 後の人の正当な問い合わせが黙って消える。
+ * このサイトは嘘ゼロが命なので、読者からの誤記の指摘が届かないほうが痛い。
+ * 連投を止めるには十分で、共有IPで巻き込みにくい数にしている。
+ */
+const LIMIT = { hour: 8, day: 30 };
+
+/* 本文の判定。**明らかに機械**なものだけを落とす。
+ * 日本語が1文字も無い問い合わせは、日本の南部鉄瓶のサイトでは
+ * ほぼ宣伝か攻撃。ただしリンクが無ければ通す（英語の善意の問い合わせを落とさないため）。
+ */
+function looksLikeSpam(message, name, url) {
+  const text = [message, name, url].filter(Boolean).join(" ");
+  const links = (text.match(/https?:\/\//gi) || []).length;
+  if (links >= 3) return "links";
+
+  const hasJa = /[ぁ-んァ-ヶ一-龥]/.test(message);
+  if (!hasJa && links >= 1) return "no_ja_with_link";
+
+  // 定番の宣伝文句。日本語の問い合わせに紛れても不自然な語だけを選ぶ
+  const NG = [
+    "seo", "backlink", "被リンク", "上位表示", "格安", "副業", "稼げ",
+    "投資", "仮想通貨", "ビットコイン", "出会い", "アダルト", "融資",
+    "viagra", "casino", "loan", "crypto", "porn", "escort",
+  ];
+  const low = text.toLowerCase();
+  let hits = 0;
+  for (const w of NG) if (low.includes(w)) hits++;
+  if (hits >= 2) return "keywords";
+
+  // 同じ文字の極端な繰り返し（機械生成でよく出る）
+  if (/(.)\1{20,}/.test(message)) return "repeat";
+  return null;
+}
+
+/* 同一IPからの送信回数を数える。IPは生で残さずハッシュにする。 */
+async function ipHash(ip) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("tetsubin:" + ip));
+  const a = new Uint8Array(buf);
+  let s = "";
+  for (let i = 0; i < 16; i++) s += a[i].toString(16).padStart(2, "0");
+  return s;
+}
+
+async function tooManyFrom(env, iph) {
+  if (!env.DB || !iph) return false;
+  try {
+    await env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS submits (iph TEXT, at INTEGER)").run();
+    const now = Date.now();
+    await env.DB.prepare("DELETE FROM submits WHERE at < ?1")
+      .bind(now - 86400000).run();
+    const h = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM submits WHERE iph = ?1 AND at > ?2")
+      .bind(iph, now - 3600000).first();
+    const d = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM submits WHERE iph = ?1 AND at > ?2")
+      .bind(iph, now - 86400000).first();
+    if ((h && h.n >= LIMIT.hour) || (d && d.n >= LIMIT.day)) return true;
+    await env.DB.prepare("INSERT INTO submits (iph, at) VALUES (?1, ?2)")
+      .bind(iph, now).run();
+    return false;
+  } catch (e) {
+    return false;   // 数えられないときは通す。正当な問い合わせを落とさない
+  }
+}
+
+/* 弾いた分の記録。人間を誤って落としていないか後から見るため。 */
+async function recordBlocked(env, reason, body, ip, country) {
+  if (!env.DB) return;
+  try {
+    await env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS blocked (at TEXT, reason TEXT, country TEXT, " +
+      "name TEXT, email TEXT, url TEXT, message TEXT)").run();
+    await env.DB.prepare(
+      "INSERT INTO blocked (at, reason, country, name, email, url, message) " +
+      "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"
+    ).bind(new Date().toISOString(), reason, country || "",
+           clean(body.name, 100), clean(body.email, 200),
+           clean(body.url, 500), clean(body.message, 1000)).run();
+  } catch (e) {
+    // 記録に失敗しても本処理は止めない
+  }
+}
+
+
 export async function onRequestPost({ request, env }) {
   let body;
   try {
@@ -149,7 +243,9 @@ export async function onRequestPost({ request, env }) {
   }
 
   // --- スパム対策1: ハニーポット。人には見えない項目に入力があったら弾く
-  if (clean(body.website, 50)) {
+  // 欄名は自動入力に狙われないものにしてある。
+  // 旧名 website も当面受ける（キャッシュされた古いページからの送信のため）。
+  if (clean(body.hp, 50) || clean(body.ct_ref2, 50) || clean(body.website, 50)) {
     // ボットには成功したように見せる（再送を誘発しないため）
     return json(200, { ok: true });
   }
@@ -164,6 +260,30 @@ export async function onRequestPost({ request, env }) {
   const ip = request.headers.get("cf-connecting-ip") || "";
   if (!(await verifyTurnstile(env.TURNSTILE_SECRET, body.token, ip))) {
     return json(400, { ok: false, error: "captcha", message: "確認に失敗しました。時間をおいてお試しください。" });
+  }
+
+  const country0 = request.headers.get("cf-ipcountry") || "";
+
+  // --- スパム対策4: 同一IPからの回数制限（1時間3通 / 1日10通）
+  //     IPは生で残さずハッシュにする
+  const iph = ip ? await ipHash(ip) : "";
+  if (await tooManyFrom(env, iph)) {
+    await recordBlocked(env, "rate", body, ip, country0);
+    return json(200, { ok: true });   // 弾いたことは教えない
+  }
+
+  // --- スパム対策5: 本文の判定（明らかに機械のものだけ落とす）
+  const spam = looksLikeSpam(clean(body.message, MAX.message),
+                             clean(body.name, MAX.name),
+                             clean(body.url, MAX.url));
+  // 本文の判定は語の一致による推測なので、人間を誤って弾く可能性が残る。
+  // **捨てずに**「スパム判定」の状態でシートへ回す。
+  // 社長は状態列で見分けられるし、正当な指摘が失われることは無くなる。
+  // （ハニーポット・3秒未満・回数超過は機械が相手なので捨ててよい）
+  let flagged = "";
+  if (spam) {
+    await recordBlocked(env, spam, body, ip, country0);
+    flagged = "スパム判定（" + spam + "）";
   }
 
   const kind = clean(body.kind, MAX.kind);
@@ -189,10 +309,12 @@ export async function onRequestPost({ request, env }) {
   // --- 保存（本命）。D1に入れば成功。メールは一切絡まない
   if (env.DB) {
     try {
+      // 状態はシートと同じ値を入れる。片方だけ 'new' だと、
+      // 後から「これはスパム判定された分か」を照合できなくなる。
       await env.DB.prepare(
         "INSERT INTO messages (at, kind, name, email, url, country, message, status) " +
-        "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'new')"
-      ).bind(at, kind, name, email, url, country, message).run();
+        "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)"
+      ).bind(at, kind, name, email, url, country, message, flagged || "new").run();
       stored = true;
     } catch (e) {
       // 例外の中身は返さない
@@ -208,7 +330,7 @@ export async function onRequestPost({ request, env }) {
     url,
     country,
     message,
-    "未対応",
+    flagged || "未対応",
   ];
   if (await appendToSheet(env, sheetRow)) stored = true;
 
